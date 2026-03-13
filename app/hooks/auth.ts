@@ -35,7 +35,10 @@ export function useAuth() {
                 }
             } catch (error) {
                 console.error('Auth check failed:', error)
-                setIsAuthenticated(false)
+                // Never block the UI forever on auth probe failures.
+                // Fallback to "no auth required" so local deployments stay usable.
+                setAuthRequired(false)
+                setIsAuthenticated(true)
             }
         }
 

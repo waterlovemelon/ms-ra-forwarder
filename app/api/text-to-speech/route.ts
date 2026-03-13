@@ -2,6 +2,7 @@ import { EdgeTTSService } from "@/service/edge-tts-service"
 import { TTSOptions } from "@/service/tts-service"
 Error.stackTraceLimit = Infinity;
 export async function GET(request: Request) {
+    const startedAt = Date.now()
     try {
         const authorization = request.headers.get('authorization')
         const requiredToken = process.env.MS_RA_FORWARDER_TOKEN || process.env.TOKEN
@@ -49,10 +50,15 @@ export async function GET(request: Request) {
             pitch,
             personality,
         }
+        console.log(
+            `[tts] request voice="${voice}" textLength=${text.length} rate=${rate} pitch=${pitch} volume=${volume} personality=${personality ?? ''} text="${text}"`
+        )
         const speech = await service.convert(text, options)
         const audioBlob = new Blob([speech.audio], { type: 'audio/mpeg' });
+        console.log(`[tts] success elapsedMs=${Date.now() - startedAt} audioBytes=${speech.audio.byteLength}`)
         return new Response(audioBlob, { status: 200, headers: { 'Content-Type': 'audio/mpeg' } })
     } catch (error) {
+        console.log(`[tts] failed elapsedMs=${Date.now() - startedAt}`)
         console.log('textToSpeach error', error)
         console.log("Full stack", (error as Error).stack)
         return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500, headers: { 'Content-Type': 'application/json' } })

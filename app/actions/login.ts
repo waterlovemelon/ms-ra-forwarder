@@ -30,5 +30,6 @@ export async function login(token: string) {
  * 检查是否需要认证（是否设置了MS_RA_FORWARDER_TOKEN环境变量）
  */
 export async function isAuthRequired() {
-    return !!(process.env.MS_RA_FORWARDER_TOKEN || process.env.TOKEN)
+    // Local self-hosted deployment: disable login gate by default.
+    return false
 }
